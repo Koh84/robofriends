@@ -6,7 +6,7 @@ import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll'
 import './App.css';
 
-import { setSearchField } from '../actions';
+import { requestRobots, setSearchField } from '../actions';
 
 //Tell me what state i need to listen to in the redux store and send to this App as props
 //mapStateToProps is use by App, 
@@ -14,8 +14,11 @@ import { setSearchField } from '../actions';
 //from searchRobots reducer
 const mapStateToProps = state => {
     return {
-        //searchField: state.searchRobots.searchField
-        searchField: state.searchField
+        //searchField: state.searchField
+        searchField: state.searchRobots.searchField,
+        robots: state.requestRobots.robots,
+        isPending: state.requestRobots.isPending,
+        error: state.requestRobots.error
     }
 }
 
@@ -33,34 +36,27 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch) => {
     //we use return here as required by redux to return an object containing our actions
     return {
-        onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+        //onRequestRobots: () => requestRobots(dispatch)
+        //thunkMiddleware is a middleware that wait and see if any action returns a function rather than object
+        onRequestRobots: () => dispatch(requestRobots())
     }
 }
 
 class App extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            robots: []
-        }
-    }
-
     componentDidMount() {
-        fetch('https://jsonplaceholder.typicode.com/users')
-        .then(response => response.json())
-        .then(users => this.setState({robots: users}))
+        this.props.onRequestRobots();
     }
 
     render() {
-        const { robots } = this.state;
         //we can now use searchField, onSearchChange as a props taken from redux store
         //as defined in mapStateToProps, mapDispatchToProps
-        const { searchField, onSearchChange } = this.props;
+        const { searchField, onSearchChange, robots, isPending } = this.props;
         const filteredRobots = robots.filter( robot => {
             return robot.name.toLowerCase().includes(searchField.toLowerCase())
         })
 
-        return !robots.length ?
+        return isPending ?
             <h1>Loading...</h1>
         :
         (
