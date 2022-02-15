@@ -1,17 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux';
+import { createLogger } from 'redux-logger';
 import './index.css';
 import App from './containers/App';
 import reportWebVitals from './reportWebVitals';
 import 'tachyons';
 import { searchRobots } from './reducers'
 
+//middleware for redux to log redux stuff
+const logger = createLogger();
 //create a redux store
 //rootReducer is combination of all reducers we have in our application
 //searchRobots is only 1 reducer
-const store = createStore(searchRobots)
+//applyMiddleware(logger) to log redux stuff
+const store = createStore(searchRobots, applyMiddleware(logger))
 
 ReactDOM.render(
   //Provider is used to pass redux store to all react components and containers
